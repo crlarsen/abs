@@ -132,10 +132,13 @@ def node(i, j, l, r):
     # This keeps the Verilog compiler from complaining that we have
     # outputs not connected to inputs.
     print("  wire %s;\n" % (gOutput))
-    print("  Gij \\%d:%d (%s, %s, %s, %s);\n" % (i, r, p1Input, g1Input, g2Input, gOutput))
+    #print("  Gij \\%d:%d (%s, %s, %s, %s);" % (i, r, p1Input, g1Input, g2Input, gOutput))
+    print("  assign %s = %s | (%s  & %s );\n" % (gOutput, g1Input, p1Input, g2Input))
   else:
     print("  wire %s, %s;\n" % (pOutput, gOutput))
     print("  PijGij \\%d:%d (%s, %s, %s, %s, %s, %s);\n" % (i, r, p1Input, p2Input, g1Input, g2Input, pOutput, gOutput))
+    #print("  assign %s = %s | (%s  & %s );" % (gOutput, g1Input, p1Input, g2Input))
+    #print("  assign %s = %s & %s;\n" % (pOutput, p1Input, p2Input)
 
 masks = []
 
