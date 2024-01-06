@@ -78,21 +78,18 @@ print(
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
-
 '''[1:] % (dt, count, count))
 
 print(
 '''
-module padder%d(A, B, Cin, S, Cout%s);
+module padder%d(A, B, Cin, S);
   localparam N = %d;
   input [N-1:0] A, B;
   input Cin;
   output [N-1:0] S;
-  output Cout;
-%s
   // P[i] is an alias for Pi:i, likewise G[i] is an alias for Gi:i
   wire [N-2:-1] P, G;
-'''[1:] % (count, (", OVF" if Overflow else ""), count, ("  output OVF;\n" if Overflow else "")))
+'''[1:] % (count, count))
 
 if count == 1:
   print(
@@ -169,16 +166,6 @@ for i in range(-1, count-1):
   else:
     #print("  Sum s%d(\\G%d:-1 , A[%d], B[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
     print("  assign S[%d] = A[%d] ^ \\G%d:-1 ;\n" % (i+1, i+1, i));
-
-# Compute Cout
-if count == 1:
-  print("  assign Cout = (G[%d] & A[%d]) | (\\G%d:-1 & B[%d]) | (A[%d] & B[%d]);\n" % (count-2, count-1, count-2, count-1, count-1, count-1))
-else:
-  print("  assign Cout = (\\G%d:-1 & A[%d]) | (\\G%d:-1 & B[%d]) | (A[%d] & B[%d]);\n" % (count-2, count-1, count-2, count-1, count-1, count-1))
-
-# If needed, compute the overflow flag
-if Overflow:
-  print("  assign OVF = Cout ^ %s;\n" % (("\\G%d:-1 " % (count-2)) if count > 1 else "G[-1]"));
 
 # End the module
 print("endmodule");
