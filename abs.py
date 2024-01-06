@@ -92,36 +92,27 @@ module abs%d(A, S);
   localparam N = %d;
   input [N-1:0] A;
   output [N-1:0] S;
-  // P[i] is an alias for Pi:i, likewise G[i] is an alias for Gi:i
+  // All Pi:i values are equal to xorA[i]
   wire [N-1:0] xorA = A ^ {N{A[N-1]}};
-  wire [N-2:-1] P;
+  // G[i] is an alias for Gi:i
   wire [-1:-1] G;
+
+  assign G[-1] = A[N-1];
 '''[1:] % (count, count))
 
-if count == 1:
-  print(
-'''
-  assign P[-1] = 1'b0;
-'''[1:])
-else:
-  print(
-'''
-  assign P = {xorA[N-2:0], 1'b0};
-'''[1:-1])
-print("  assign G[-1] = A[N-1];\n")
 #Header info
 
 # Compute the next node in the net.
 def node(i, j, l, r):
   if i == j:
-    p1Input = "P[%d]" % (i)
+    p1Input = "xorA[%d]" % (i)
     g1Input = "G[%d]" % (i)
   else:
     p1Input = "\\P%d:%d " % (i, j)
     g1Input = "\\G%d:%d " % (i, j)
 
   if (l == r):
-    p2Input = "P[%d]" % (l)
+    p2Input = "xorA[%d]" % (l)
     g2Input = "G[%d]" % (l)
   else:
     p2Input = "\\P%d:%d " % (l, r)
