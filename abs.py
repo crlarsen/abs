@@ -82,9 +82,9 @@ print(
 
 print(
 '''
-module padder%d(A, B, Cin, S);
+module padder%d(A, Cin, S);
   localparam N = %d;
-  input [N-1:0] A, B;
+  input [N-1:0] A;
   input Cin;
   output [N-1:0] S;
   // P[i] is an alias for Pi:i, likewise G[i] is an alias for Gi:i
@@ -100,8 +100,8 @@ if count == 1:
 else:
   print(
 '''
-  assign P = {A[N-2:0] | B[N-2:0], 1'b0};
-  assign G = {A[N-2:0] & B[N-2:0], Cin};
+  assign P = {A[N-2:0], 1'b0};
+  assign G = {{N{1'b0}}, Cin};
 '''[1:])
 #Header info
 
@@ -161,10 +161,10 @@ for i in range(-1, count-1):
 
   # Use Gi:-1 to propagate carry to compute bit i+1 of the sum.
   if i == -1:
-    #print("  Sum s%d(G[%d], A[%d], B[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
+    #print("  Sum s%d(G[%d], A[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
     print("  assign S[%d] = A[%d] ^ G[%d];\n" % (i+1, i+1, i));
   else:
-    #print("  Sum s%d(\\G%d:-1 , A[%d], B[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
+    #print("  Sum s%d(\\G%d:-1 , A[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
     print("  assign S[%d] = A[%d] ^ \\G%d:-1 ;\n" % (i+1, i+1, i));
 
 # End the module
