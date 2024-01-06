@@ -46,7 +46,7 @@ print(
 //
 // Create Date: %s
 // Design Name:
-// Module Name: padder%d
+// Module Name: abs%d
 // Project Name:
 // Target Devices:
 // Tool Versions:
@@ -59,7 +59,7 @@ print(
 //
 //       If bugs are found in the script I (Chris Larsen) would ask that you
 //       send your bug fixes, and or other improvements, back so I can include
-//       them in the git repository for the padder.py script.
+//       them in the git repository for the abs.py script.
 //
 //       Prefix adders are described in the book "Digital Design and Computer
 //       Architecture, Second Edition" by David Money Harris & Sarah L. Harris.
@@ -69,7 +69,7 @@ print(
 //       please buy their fine book! :-)
 //
 //       The Python script used to generate this code can be downloaded from
-//       https://github.com/crlarsen/padder/
+//       https://github.com/crlarsen/abs/
 //
 // Dependencies: None
 //
@@ -82,12 +82,12 @@ print(
 
 print(
 '''
-module padder%d(A, Cin, S);
+module abs%d(A, S);
   localparam N = %d;
   input [N-1:0] A;
-  input Cin;
   output [N-1:0] S;
   // P[i] is an alias for Pi:i, likewise G[i] is an alias for Gi:i
+  wire [N-1:0] xorA = A ^ {N{A[N-1]}};
   wire [N-2:-1] P, G;
 '''[1:] % (count, count))
 
@@ -95,13 +95,13 @@ if count == 1:
   print(
 '''
   assign P[-1] = 1'b0;
-  assign G[-1] = Cin;
+  assign G[-1] = A[N-1];
 '''[1:])
 else:
   print(
 '''
-  assign P = {A[N-2:0], 1'b0};
-  assign G = {{N{1'b0}}, Cin};
+  assign P = {xorA[N-2:0], 1'b0};
+  assign G = {{N{1'b0}}, A[N-1]};
 '''[1:])
 #Header info
 
@@ -161,11 +161,11 @@ for i in range(-1, count-1):
 
   # Use Gi:-1 to propagate carry to compute bit i+1 of the sum.
   if i == -1:
-    #print("  Sum s%d(G[%d], A[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
-    print("  assign S[%d] = A[%d] ^ G[%d];\n" % (i+1, i+1, i));
+    #print("  Sum s%d(G[%d], xorA[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
+    print("  assign S[%d] = xorA[%d] ^ G[%d];\n" % (i+1, i+1, i));
   else:
-    #print("  Sum s%d(\\G%d:-1 , A[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
-    print("  assign S[%d] = A[%d] ^ \\G%d:-1 ;\n" % (i+1, i+1, i));
+    #print("  Sum s%d(\\G%d:-1 , xorA[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
+    print("  assign S[%d] = xorA[%d] ^ \\G%d:-1 ;\n" % (i+1, i+1, i));
 
 # End the module
 print("endmodule");
