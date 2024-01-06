@@ -10,24 +10,20 @@ dt = datetime.today().strftime("%m/%d/%Y %I:%M:%S %p")
 
 def usage(msg):
   print(msg, file=sys.stderr)
-  print("Usage: %s [-o | --overflow] <number of bits>" % (sys.argv[0]), file=sys.stderr)
+  print("Usage: %s <number of bits>" % (sys.argv[0]), file=sys.stderr)
   sys.exit(1)
 
-Overflow = False
 CountNotFound = True
 
 if len(sys.argv) == 1:
   usage("ERROR: No arguments given")
 elif len(sys.argv) < 4:
   for arg in sys.argv[1:]:
-    if arg == "--overflow" or arg == "-o":
-      Overflow = True
-    else:
-      try:
-        count = int(arg)
-        CountNotFound = False
-      except ValueError:
-        usage("ERROR: Input value is not a valid integer: %s" % (arg))
+    try:
+      count = int(arg)
+      CountNotFound = False
+    except ValueError:
+      usage("ERROR: Input value is not a valid integer: %s" % (arg))
 
   if CountNotFound:
     usage("ERROR: Missing count argument")
@@ -35,6 +31,16 @@ elif len(sys.argv) < 4:
     usage("ERROR: Number of bits must be a positive number: %d" % (count))
 else:
   usage("ERROR: Too many command line arguments")
+
+zero = []
+
+def zeroG(i, j, gInput):
+  if (i != -1) and (i == j):
+    return True
+  elif gInput in zero:
+    return True
+  else:
+    return False
 
 #Header info
 print(
@@ -88,21 +94,21 @@ module abs%d(A, S);
   output [N-1:0] S;
   // P[i] is an alias for Pi:i, likewise G[i] is an alias for Gi:i
   wire [N-1:0] xorA = A ^ {N{A[N-1]}};
-  wire [N-2:-1] P, G;
+  wire [N-2:-1] P;
+  wire [-1:-1] G;
 '''[1:] % (count, count))
 
 if count == 1:
   print(
 '''
   assign P[-1] = 1'b0;
-  assign G[-1] = A[N-1];
 '''[1:])
 else:
   print(
 '''
   assign P = {xorA[N-2:0], 1'b0};
-  assign G = {{N{1'b0}}, A[N-1]};
-'''[1:])
+'''[1:-1])
+print("  assign G[-1] = A[N-1];\n")
 #Header info
 
 # Compute the next node in the net.
@@ -128,14 +134,33 @@ def node(i, j, l, r):
     # We don't need to compute \Pi:-1 because it will never be used.
     # This keeps the Verilog compiler from complaining that we have
     # outputs not connected to inputs.
-    print("  wire %s;\n" % (gOutput))
-    #print("  Gij \\%d:%d (%s, %s, %s, %s);" % (i, r, p1Input, g1Input, g2Input, gOutput))
-    print("  assign %s = %s | (%s  & %s );\n" % (gOutput, g1Input, p1Input, g2Input))
+    if zeroG(i, j, g1Input) and zeroG(l, r, g2Input):
+      zero.append(gOutput)
+    else:
+      print("  wire %s;\n" % (gOutput))
+      if zeroG(i, j, g1Input):
+        print("  assign %s = %s  & %s ;\n" % (gOutput, p1Input, g2Input))
+      elif zeroG(l, r, g2Input):
+        print("  assign %s = %s ;\n" % (gOutput, g1Input))
+      else:
+        print("  assign %s = %s | (%s  & %s );\n" % (gOutput, g1Input, p1Input, g2Input))
   else:
-    print("  wire %s, %s;\n" % (pOutput, gOutput))
+    if zeroG(i, j, g1Input) and zeroG(l, r, g2Input):
+      print("  wire %s;\n" % (pOutput))
+    else:
+      print("  wire %s, %s;\n" % (pOutput, gOutput))
     #print("  PijGij \\%d:%d (%s, %s, %s, %s, %s, %s);" % (i, r, p1Input, p2Input, g1Input, g2Input, pOutput, gOutput))
     print("  assign %s = %s & %s ;" % (pOutput, p1Input, p2Input))
-    print("  assign %s = %s | (%s  & %s );\n" % (gOutput, g1Input, p1Input, g2Input))
+    if zeroG(i, j, g1Input) and zeroG(l, r, g2Input):
+      zero.append(gOutput)
+      print("")
+    else:
+      if zeroG(i, j, g1Input):
+        print("  assign %s = %s  & %s ;\n" % (gOutput, p1Input, g2Input))
+      elif zeroG(l, r, g2Input):
+        print("  assign %s = %s ;\n" % (gOutput, g1Input))
+      else:
+        print("  assign %s = %s | (%s  & %s );\n" % (gOutput, g1Input, p1Input, g2Input))
 
 masks = []
 
