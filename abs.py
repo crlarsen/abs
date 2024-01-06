@@ -136,9 +136,9 @@ def node(i, j, l, r):
     print("  assign %s = %s | (%s  & %s );\n" % (gOutput, g1Input, p1Input, g2Input))
   else:
     print("  wire %s, %s;\n" % (pOutput, gOutput))
-    print("  PijGij \\%d:%d (%s, %s, %s, %s, %s, %s);\n" % (i, r, p1Input, p2Input, g1Input, g2Input, pOutput, gOutput))
-    #print("  assign %s = %s | (%s  & %s );" % (gOutput, g1Input, p1Input, g2Input))
-    #print("  assign %s = %s & %s;\n" % (pOutput, p1Input, p2Input)
+    #print("  PijGij \\%d:%d (%s, %s, %s, %s, %s, %s);" % (i, r, p1Input, p2Input, g1Input, g2Input, pOutput, gOutput))
+    print("  assign %s = %s & %s ;" % (pOutput, p1Input, p2Input))
+    print("  assign %s = %s | (%s  & %s );\n" % (gOutput, g1Input, p1Input, g2Input))
 
 masks = []
 
