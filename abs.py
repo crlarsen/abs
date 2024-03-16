@@ -99,9 +99,7 @@ module abs%d(A, S);
   // All Pi:i values are equal to xorA[i]
   wire [N-1:0] xorA = A ^ {N{A[N-1]}};
   // G[i] is an alias for Gi:i
-  wire [-1:-1] G;
-
-  assign G[-1] = A[N-1];
+  wire \G-1:-1 = A[N-1];
 '''[1:] % (count, count))
 
 #Header info
@@ -110,17 +108,15 @@ module abs%d(A, S);
 def node(i, j, l, r):
   if i == j:
     p1Input = "xorA[%d]" % (i)
-    g1Input = "G[%d]" % (i)
   else:
     p1Input = "\\P%d:%d " % (i, j)
-    g1Input = "\\G%d:%d " % (i, j)
+  g1Input = "\\G%d:%d " % (i, j)
 
   if (l == r):
     p2Input = "xorA[%d]" % (l)
-    g2Input = "G[%d]" % (l)
   else:
     p2Input = "\\P%d:%d " % (l, r)
-    g2Input = "\\G%d:%d " % (l, r)
+  g2Input = "\\G%d:%d " % (l, r)
 
   pOutput = "\\P%d:%d " % (i, r)
   gOutput = "\\G%d:%d " % (i, r)
@@ -134,11 +130,11 @@ def node(i, j, l, r):
     else:
       print("  wire %s;\n" % (gOutput))
       if zeroG(i, j, g1Input):
-        print("  assign %s = %s  & %s ;\n" % (gOutput, p1Input, g2Input))
+        print("  assign %s = %s  & %s;\n" % (gOutput, p1Input, g2Input))
       elif zeroG(l, r, g2Input):
-        print("  assign %s = %s ;\n" % (gOutput, g1Input))
+        print("  assign %s = %s;\n" % (gOutput, g1Input))
       else:
-        print("  assign %s = %s | (%s  & %s );\n" % (gOutput, g1Input, p1Input, g2Input))
+        print("  assign %s = %s| (%s  & %s);\n" % (gOutput, g1Input, p1Input, g2Input))
   else:
     if zeroG(i, j, g1Input) and zeroG(l, r, g2Input):
       print("  wire %s;\n" % (pOutput))
@@ -151,11 +147,11 @@ def node(i, j, l, r):
       print("")
     else:
       if zeroG(i, j, g1Input):
-        print("  assign %s = %s  & %s ;\n" % (gOutput, p1Input, g2Input))
+        print("  assign %s = %s  & %s;\n" % (gOutput, p1Input, g2Input))
       elif zeroG(l, r, g2Input):
-        print("  assign %s = %s ;\n" % (gOutput, g1Input))
+        print("  assign %s = %s;\n" % (gOutput, g1Input))
       else:
-        print("  assign %s = %s | (%s  & %s );\n" % (gOutput, g1Input, p1Input, g2Input))
+        print("  assign %s = %s| (%s  & %s);\n" % (gOutput, g1Input, p1Input, g2Input))
 
 masks = []
 
@@ -180,12 +176,7 @@ for i in range(-1, count-1):
     j = r
 
   # Use Gi:-1 to propagate carry to compute bit i+1 of the sum.
-  if i == -1:
-    #print("  Sum s%d(G[%d], xorA[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
-    print("  assign S[%d] = xorA[%d] ^ G[%d];\n" % (i+1, i+1, i));
-  else:
-    #print("  Sum s%d(\\G%d:-1 , xorA[%d], S[%d]);" % (i+1, i, i+1, i+1, i+1));
-    print("  assign S[%d] = xorA[%d] ^ \\G%d:-1 ;\n" % (i+1, i+1, i));
+  print("  assign S[%d] = xorA[%d] ^ \\G%d:-1 ;\n" % (i+1, i+1, i));
 
 # End the module
 print("endmodule");
